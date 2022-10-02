@@ -12,6 +12,7 @@ export default async function handler(
         reorderedVideos.forEach((video) => {
             client.set(video.id, JSON.stringify({ position: video.newPosition}))
         });
+        fetch('https://api.vercel.com/v1/integrations/deploy/prj_FEhOJurqCDz3pjlSpULMDbCKCU7e/l7P7KZBLKk');
         res.status(200).json(reorderedVideos);
     }
   }

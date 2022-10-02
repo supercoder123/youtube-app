@@ -38,14 +38,10 @@ const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelRes
       }
       return null;
     }).filter((val) => val);
+
     setReorderedCards(updatedCards);
 
   }, [cards]);
-
-  useEffect(() => {
-    console.log(reorderedCards);
-    
-  }, [reorderedCards])
 
   function saveOrder() {
     fetch('/api/set-videos', {
@@ -108,12 +104,15 @@ export async function getStaticProps(context: any) {
 
   for (let i=0; i<videoData.items.length; i++) {
     const reorderedVideo = await client.get(videoData.items[i].id);
+
     if (reorderedVideo) {
       // console.log(reorderedVideo)
       const cacheData = JSON.parse(reorderedVideo);
       videoData.items[i].snippet.position = cacheData.position;
     }
   }
+
+  console.log(videoData.items[0])
 
   videoData.items.sort((a, b) => a.snippet.position - b.snippet.position);
 
