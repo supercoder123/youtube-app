@@ -6,8 +6,8 @@ import VideoCard from '../components/VideoCard/VideoCard';
 import update from 'immutability-helper';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
-import { TouchBackend } from 'react-dnd-touch-backend';
 import { YoutubeChannelResponse, YoutubeVideoItem, YoutubeVideosResponse } from '../types';
+import { client } from '../redis/redis-client';
 
 
 const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelResponse }> = ({ videos, channel }: { videos: YoutubeVideosResponse, channel: YoutubeChannelResponse }) => {
@@ -48,7 +48,7 @@ const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelRes
   }, [reorderedCards])
 
   function saveOrder() {
-    fetch('http://localhost:3000/api/set-videos', {
+    fetch('/api/set-videos', {
       method: 'POST',
       body: JSON.stringify(reorderedCards),
     });
@@ -99,12 +99,28 @@ const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelRes
 }
 
 export async function getStaticProps(context: any) {
-  const res = await fetch('http://localhost:3000/api/get-videos');
-  const data = await res.json();
+  const API_KEY = 'AIzaSyC4eoBC80aEtdnjIgbL4A9vyJqln1w22us';
+  const channelListUrl = `https://youtube.googleapis.com/youtube/v3/channels?part=snippet%2CcontentDetails%2Cstatistics&id=UCDt-2KorfMpzLf-CX71n18A&key=${API_KEY}`;
+  
+  const channelData: YoutubeChannelResponse = await (await fetch(channelListUrl)).json();
+  const playListId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+  const videoData: YoutubeVideosResponse = await (await fetch(`https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=25&playlistId=${playListId}&key=${API_KEY}`)).json();
+
+  for (let i=0; i<videoData.items.length; i++) {
+    const reorderedVideo = await client.get(videoData.items[i].id);
+    if (reorderedVideo) {
+      // console.log(reorderedVideo)
+      const cacheData = JSON.parse(reorderedVideo);
+      videoData.items[i].snippet.position = cacheData.position;
+    }
+  }
+
+  videoData.items.sort((a, b) => a.snippet.position - b.snippet.position);
+
   return {
     props: {
-      videos: data.videoData,
-      channel: data.channelData
+      videos: videoData,
+      channel: channelData
     }, // will be passed to the page component as props
   }
 }
