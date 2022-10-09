@@ -11,7 +11,7 @@ import db from '../firebase/admin';
 import useSWRInfinite from 'swr/infinite';
 import { SWRConfig, unstable_serialize } from 'swr';
 
-const getKey = (pageIndex, previousPageData) => {
+const getKey = (pageIndex: number, previousPageData: YoutubeVideosResponse) => {
   // reached the end
   if (previousPageData && !previousPageData.nextPageToken) return null;
 
@@ -22,9 +22,16 @@ const getKey = (pageIndex, previousPageData) => {
   return `${PLAYLISTS_ITEMS_API_URL}&pageToken=${previousPageData.nextPageToken}`;
 }
 
-const fetcher = (...args) => fetch(...args).then(res => res.json())
+// const fetcher = (...args: any[]) => fetch(...args: any[]).then(res => res.json())
 
-
+const fetcher = async (
+  input: RequestInfo,
+  init: RequestInit,
+  ...args: any[]
+) => {
+  const res = await fetch(input, init);
+  return res.json();
+};
 
 type UpdatedVideoList = (UpdatedVideoPropsItem | null)[];
 

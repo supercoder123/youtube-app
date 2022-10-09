@@ -10,7 +10,7 @@ try {
         credential: admin.credential.cert(serviceAccountConfig),
     })
     console.log('Initialized.')
-} catch (error) {
+} catch (error: any) {
     /*
      * We skip the "already exists" message which is
      * not an actual error when we're hot-reloading.

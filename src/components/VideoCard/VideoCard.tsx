@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import React, { useRef } from 'react'
-import { DragPreviewImage, useDrag, useDrop, DragSource } from 'react-dnd';
+import { DragPreviewImage, useDrag, useDrop } from 'react-dnd';
 import { YoutubeVideoItem } from '../../types';
 import PlayIcon from '../../assets/images/play-icon.svg'
 

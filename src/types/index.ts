@@ -43,7 +43,9 @@ export interface YoutubeVideoItem {
 }
 
 export interface YoutubeVideosResponse {
-  items: Array<YoutubeVideoItem>
+  items: Array<YoutubeVideoItem>;
+  nextPageToken: string;
+  prevPageToken: string;
 };
 
 interface YoutubeVideosResponseExtraProps {
