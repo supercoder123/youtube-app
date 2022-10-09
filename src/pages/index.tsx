@@ -1,18 +1,49 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import VideoCard from '../components/VideoCard/VideoCard';
 import update from 'immutability-helper';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DndProvider } from 'react-dnd';
-import { YoutubeChannelResponse, YoutubeVideoItem, YoutubeVideosResponse } from '../types';
-import { client } from '../redis/redis-client';
+import { PageProps, UpdatedVideoPropsItem, YoutubeChannelResponse, YoutubeVideoItem, YoutubeVideosResponse } from '../types';
+import { CHANNELS_API_URL, PLAYLISTS_ITEMS_API_URL } from '../constants/youtube-api';
+import db from '../firebase/admin';
+import useSWRInfinite from 'swr/infinite';
+import { SWRConfig, unstable_serialize } from 'swr';
+
+const getKey = (pageIndex, previousPageData) => {
+  // reached the end
+  if (previousPageData && !previousPageData.nextPageToken) return null;
+
+  // first page, we don't have `previousPageData`
+  if (pageIndex === 0) return PLAYLISTS_ITEMS_API_URL;
+
+  // add the cursor to the API endpoint
+  return `${PLAYLISTS_ITEMS_API_URL}&pageToken=${previousPageData.nextPageToken}`;
+}
+
+const fetcher = (...args) => fetch(...args).then(res => res.json())
 
 
-const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelResponse }> = ({ videos, channel }: { videos: YoutubeVideosResponse, channel: YoutubeChannelResponse }) => {
+
+type UpdatedVideoList = (UpdatedVideoPropsItem | null)[];
+
+const Home: NextPage<PageProps> = ({ videos, channel, videoIdCommaList, fallback }) => {
   const [cards, setCards] = useState<YoutubeVideosResponse['items']>(videos.items);
-  const [reorderedCards, setReorderedCards] = useState<any>();
+  const [reorderedCards, setReorderedCards] = useState<UpdatedVideoList>();
+  const { data, size, setSize, isValidating } = useSWRInfinite(getKey, fetcher, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateAll: false,
+    revalidateFirstPage: false,
+  })
+  const handleScroll = () => {
+    const {clientHeight, scrollTop, scrollHeight} = document.documentElement;
+    if ((clientHeight + scrollTop) >= scrollHeight) {
+        setSize(size + 1);
+    }
+  }
 
   const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
 
@@ -25,6 +56,12 @@ const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelRes
       })
     );
   }, []);
+
+  useEffect(() => {
+    if (data && data.length >= 2) {
+      setCards(prevCards => [...prevCards, ...data[data.length - 1].items])
+    }
+  }, [data])
 
   useEffect(() => {
     const updatedCards = cards.map((card: YoutubeVideoItem, i) => {
@@ -43,6 +80,16 @@ const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelRes
 
   }, [cards]);
 
+  
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll)
+  
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [size]);
+
   function saveOrder() {
     fetch('/api/set-videos', {
       method: 'POST',
@@ -50,8 +97,11 @@ const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelRes
     });
   }
 
+  // if (!data) return 'loading';
 
   return (
+    <SWRConfig value={{ fallback }}>
+
     <div>
       <Head>
         <title>Create Next App</title>
@@ -62,7 +112,6 @@ const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelRes
       <main>
         <div className="w-full">
           <h1 className="text-2xl text-center">{channel.items[0].snippet.title}</h1>
-
           <button
             className='px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2'
             onClick={() => {
@@ -74,15 +123,25 @@ const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelRes
 
           <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 items-center">
             <DndProvider backend={HTML5Backend}>
+              {/* {
+                data.map((item, index) => {
+                  return item.items.map((video, index) => {
+                    return <VideoCard key={video.id} id={video.id} index={index} video={video} moveCard={moveCard} />
+                  })
+                })
+              } */}
 
               {
                 cards.map((video, index) => {
-                  return <VideoCard key={video.id} id={video.id} index={index} video={video} moveCard={moveCard} />
+                  return <VideoCard key={video.id} id={video.id} index={index} video={video} moveCard={moveCard}/>
                 })
               }
             </DndProvider>
-          </div>
 
+            {/* {(isValidating) && <div className='animate-pulse '>Loding more</div>} */}
+          </div>
+          
+          {(isValidating) && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span> }
 
         </div>
       </main>
@@ -91,36 +150,38 @@ const Home: NextPage<{ videos: YoutubeVideosResponse, channel: YoutubeChannelRes
 
       </footer>
     </div>
+    </SWRConfig>
   )
 }
 
 export async function getStaticProps(context: any) {
-  const API_KEY = 'AIzaSyC4eoBC80aEtdnjIgbL4A9vyJqln1w22us';
-  const channelListUrl = `https://youtube.googleapis.com/youtube/v3/channels?part=snippet%2CcontentDetails%2Cstatistics&id=UCDt-2KorfMpzLf-CX71n18A&key=${API_KEY}`;
   
-  const channelData: YoutubeChannelResponse = await (await fetch(channelListUrl)).json();
+  const channelData: YoutubeChannelResponse = await (await fetch(CHANNELS_API_URL)).json();
   const playListId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
-  const videoData: YoutubeVideosResponse = await (await fetch(`https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails&maxResults=25&playlistId=${playListId}&key=${API_KEY}`)).json();
-
+  const videoData: YoutubeVideosResponse = await (await fetch(`${PLAYLISTS_ITEMS_API_URL}&playlistId=${playListId}`)).json();
+  const docRef = db.collection('youtube');
+  const videoIds = [];
+  
   for (let i=0; i<videoData.items.length; i++) {
-    const reorderedVideo = await client.get(videoData.items[i].id);
-
-    if (reorderedVideo) {
-      // console.log(reorderedVideo)
-      const cacheData = JSON.parse(reorderedVideo);
-      videoData.items[i].snippet.position = cacheData.position;
+    const reorderedVideo = await docRef.doc(videoData.items[i].id).get();
+    const data = reorderedVideo.data();
+    videoIds.push(videoData.items[i].snippet.resourceId.videoId)
+    if (reorderedVideo.exists && data) {
+      videoData.items[i].snippet.position = data.newPosition;
     }
   }
-
-  console.log(videoData.items[0])
 
   videoData.items.sort((a, b) => a.snippet.position - b.snippet.position);
 
   return {
     props: {
       videos: videoData,
-      channel: channelData
-    }, // will be passed to the page component as props
+      channel: channelData,
+      videoIdCommaList: videoIds.join(','),
+      fallback: {
+        [unstable_serialize([PLAYLISTS_ITEMS_API_URL])]: videoData
+      }
+    },
   }
 }
 

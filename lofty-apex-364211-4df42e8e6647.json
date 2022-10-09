@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "lofty-apex-364211",
+  "private_key_id": "4df42e8e6647cc7c6b7a3296bc65a2c6ace3829b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC+SWvAqQT1wD+k\nWqbCV8aeBPqjCZ7xU9JowIy2iVSWtUPvZSYQVtnGKcGCoHKvaLqDhHODt3UTiyKi\nazxy3qlpRTtL7F/Sk+hxdmwjJFn6XwGqDd3IMzad0JiOgPDI+4YMM9Ax3Aicc7Iv\nEXp+1LCVTd2+m8Rb1Io8t7aFOpuFyJ1rKgPEBmJz5jpFizGfKd0sQXyPrPw745oH\ntnASEGFDaK/GHHLKQJWHS+L4UQdvi0oaVp9HrJA5Iza7/IpWTX/iwDGt4j3ZC23N\n5eSi/l0R54VrDlD/aYfPAdv98lzW4GOgZYorIEhup8tSJLBm/l56HsOKrhZI8syP\n43CypDuJAgMBAAECggEABxM6SSvPpiaLhzwioqu6VBJJ0mmPahgshN4R7VCOX1sm\nhz5qy6U7DCntysJV+U0q0CyK0f0ugndEJqdXlErQoDwlgAVuK6l5tUxKqYTWvp8t\nM+o3kpPK5lPE9Fl5enOVsJr1lQECJfUMTUE4XYJhfW+rfMSUaLiumiLXi70Z3r++\nJi0R5yXQf2P41AueF+0snx/eq7u8V9LZ9+nWCNHfDbyGFHiUX3wAaA/LJFy8BkGL\nDy1tSK3lQfiIac48EkFTl5hMkT1UWwLAu6g6z44i+uDlVXQZXOaTug2ROfjH7DXC\n4r4mqbpAGteuuVtf6Lp/84FIAyHpWIP1hbS8jHmcDQKBgQDg/o1pjZz/HOnjuS2p\nwdH5G0cyg72URjbw9qo0VFwPfMQwU3EfU+i2TVqJzN1+WroTdRCgmedHnV05o5Jy\n3My8v4wA209ZGoGo6g2rmdb7dCR2mLpZj9dUbliO0TrA/yp7ZEEcDkKz7+r0r/ri\nxrB67NHj1dwhtgjtxJNMjxyeTQKBgQDYgnDWY00V/t8b5dqqm6Cw5eDpuVEg1EWY\nGSGrsK/k3z6IOId3Efk56TYCMQ8BxIUDaBrYqbUBmnS2VFxXj6DfndFklfdYYJre\nMTKMvK1aUCnVtk+SylI7t02iop4krnt1Z/lQULiDH93LGWTKpcAllJPP+6MgyOGe\niK3aNVIILQKBgEfwvJCiii98NEDvJe2gnp3THgnF2+k8JjcX98Yxrxn4n9Z/56zH\nrKIVy7xB+BR9t/+er8laTHw2kedrKNl3RjOX35Eqjo2EDy9OXz6eOwI92abeIL+g\nYY6KleBcgDfTnubDYJoy6RsVvH+ugT7fnvA/JsF90RwqU2KLNzoEjHcFAoGAdNUm\n2LmrLlRjxuUpM2lZtDvIO7dxzPpfN61QGxr0P9gsIUwH5bwANjzflR0uEPEgKe9y\nlTo238+ebYlmbyWlVSYPiWzXlYxD5eS8d2+VSCf7+0Qu+nJNH8ZRkZKZLggtvPRH\neAynFLMMd32TgzsgTec4QEJ1C8r63Ra6Ygbl5l0CgYADkD22lg3lBe4upwuWUvav\nblNBZ4t4H+xaNeorvAX8FJpl5j/RX4c94Y41rBYXqHnIdcIPhcXB5KFaLL7WyhvD\nnCoPyLzUBl0We+1FwbPi/V6ixCN3skkey9Fk4Ndt935LgWTGGzJ8gJt2vVshJF3t\nvYjFfijd1uV7zmx0U5pwVQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-z21mv@lofty-apex-364211.iam.gserviceaccount.com",
+  "client_id": "102541290884346838646",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-z21mv%40lofty-apex-364211.iam.gserviceaccount.com"
+}
