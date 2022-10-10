@@ -197,7 +197,7 @@ export async function getServerSideProps(context: any) {
   const playListId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
   const videoData: YoutubeVideosResponse = await (await fetch(`${PLAYLISTS_ITEMS_API_URL}&playlistId=${playListId}`)).json();
   const snapshot = await db.collection('youtube').get();
-  const collection = {};
+  const collection:any = {};
     snapshot.forEach(doc => {
         collection[doc.id] = doc.data();
     });
