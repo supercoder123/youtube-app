@@ -161,8 +161,38 @@ const Home: NextPage<PageProps> = ({ videos, channel, videoIdCommaList, fallback
   )
 }
 
-export async function getStaticProps(context: any) {
+// export async function getStaticProps(context: any) {
   
+//   const channelData: YoutubeChannelResponse = await (await fetch(CHANNELS_API_URL)).json();
+//   const playListId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+//   const videoData: YoutubeVideosResponse = await (await fetch(`${PLAYLISTS_ITEMS_API_URL}&playlistId=${playListId}`)).json();
+//   const docRef = db.collection('youtube');
+//   const videoIds = [];
+  
+//   for (let i=0; i<videoData.items.length; i++) {
+//     const reorderedVideo = await docRef.doc(videoData.items[i].id).get();
+//     const data = reorderedVideo.data();
+//     videoIds.push(videoData.items[i].snippet.resourceId.videoId)
+//     if (reorderedVideo.exists && data) {
+//       videoData.items[i].snippet.position = data.newPosition;
+//     }
+//   }
+
+//   videoData.items.sort((a, b) => a.snippet.position - b.snippet.position);
+
+//   return {
+//     props: {
+//       videos: videoData,
+//       channel: channelData,
+//       videoIdCommaList: videoIds.join(','),
+//       fallback: {
+//         [unstable_serialize([PLAYLISTS_ITEMS_API_URL])]: videoData
+//       }
+//     },
+//   }
+// }
+
+export async function getServerSideProps(context: any) {
   const channelData: YoutubeChannelResponse = await (await fetch(CHANNELS_API_URL)).json();
   const playListId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
   const videoData: YoutubeVideosResponse = await (await fetch(`${PLAYLISTS_ITEMS_API_URL}&playlistId=${playListId}`)).json();

@@ -37,7 +37,7 @@ const VideoCard = ({ video, id, index, moveCard }: { video: YoutubeVideoItem, id
 
       // Determine rectangle on screen
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      console.log(ref.current, hoverBoundingRect)
+      // console.log(ref.current, hoverBoundingRect)
 
       // Get vertical middle
       const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 3;
@@ -46,20 +46,23 @@ const VideoCard = ({ video, id, index, moveCard }: { video: YoutubeVideoItem, id
       // console.log()
       // Determine mouse position
       const clientOffset = monitor.getClientOffset();
-      console.log('clientOffset',clientOffset)
+      // console.log('clientOffset',clientOffset)
 
       // Get pixels to the top
       const hoverClientY = (clientOffset as any).y - hoverBoundingRect.top;
       const hoverClientX = (clientOffset as any).x - hoverBoundingRect.left;
-
-      if (hoverIndex < dragIndex && (hoverBoundingRect.width) < hoverMiddleX) {
-        return
+      var next = ((clientOffset as any).y - hoverBoundingRect.top) / (hoverBoundingRect.bottom - hoverBoundingRect.top) > .2 || ((clientOffset as any).x - hoverBoundingRect.left) / (hoverBoundingRect.right - hoverBoundingRect.left) > .2;    
+      if (!next) {
+        return;
       }
+      // if (hoverIndex < dragIndex && (hoverBoundingRect.width) < hoverMiddleX) {
+      //   return
+      // }
 
       // if (hoverClientX < hoverMiddleX) {
       //   return
       // }
-      console.log({hoverMiddleX})
+      // console.log({hoverMiddleX})
       // Time to actually perform the action
       moveCard(dragIndex, hoverIndex);
       item.index = hoverIndex;
@@ -82,10 +85,11 @@ const VideoCard = ({ video, id, index, moveCard }: { video: YoutubeVideoItem, id
   drag(drop(ref));
   return (
     <>
-      {/* <DragPreviewImage src={thumbnail} connect={preview} /> */}
+      <DragPreviewImage src={thumbnail} connect={preview} />
     <div key={video.id} ref={ref} className="relative group cursor-grab">
+      {/* group-hover:scale-125 */}
       <Image
-        className="object-cover aspect-video sm:w-full group-hover:scale-125 transition ease-in-out"
+        className="object-cover aspect-video sm:w-full transition ease-in-out"
         style={{
           cursor: dragEnd ? 'grab' : 'grabbing'
         }}
@@ -97,7 +101,7 @@ const VideoCard = ({ video, id, index, moveCard }: { video: YoutubeVideoItem, id
         placeholder='blur'
         blurDataURL='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN0cXS5AQADPQGj+65iUQAAAABJRU5ErkJggg=='
       />
-      <div className="flex flex-col justify-between invisible absolute p-4 md:p-8 text-base xl:text-2xl top-0 left-0 w-full h-full bg-slate-800/80 group-hover:visible">
+      <div className="flex flex-col justify-between invisible absolute p-4 md:p-8 text-base xl:text-2xl top-0 left-0 w-full h-full bg-slate-800/80 group-hover:visible ease-in-out">
         {title}
 
         <div className='flex justify-between items-center'>
