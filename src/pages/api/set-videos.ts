@@ -13,7 +13,11 @@ export default async function handler(
     if (req.method === "POST") {
         const reorderedVideos: UpdatedVideoPropsItem[] = JSON.parse(req.body);
         reorderedVideos.forEach(async (video) => {
-          await db.collection('youtube').doc(video.id).set(video);
+          try {
+            await db.collection('youtube').doc(video.id).set(video);
+          } catch(e) {
+            console.error(e)
+          }
         });
         // await fetch('https://api.vercel.com/v1/integrations/deploy/prj_FEhOJurqCDz3pjlSpULMDbCKCU7e/l7P7KZBLKk');
         res.status(200).json(reorderedVideos);

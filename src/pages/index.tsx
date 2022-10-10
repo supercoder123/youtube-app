@@ -206,8 +206,11 @@ export async function getServerSideProps(context: any) {
   for (let i = 0; i < videoData.items.length; i++) {
     try {
       const data = collection[videoData.items[i].id];
-      videoIds.push(videoData.items[i].snippet.resourceId.videoId)
+      if (data) {
+        videoIds.push(videoData.items[i].snippet.resourceId.videoId)
         videoData.items[i].snippet.position = data.newPosition;
+      }
+
     } catch (e) {
       console.log(e)
     }
