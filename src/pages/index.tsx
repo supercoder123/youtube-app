@@ -196,22 +196,23 @@ export async function getServerSideProps(context: any) {
   const channelData: YoutubeChannelResponse = await (await fetch(CHANNELS_API_URL)).json();
   const playListId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
   const videoData: YoutubeVideosResponse = await (await fetch(`${PLAYLISTS_ITEMS_API_URL}&playlistId=${playListId}`)).json();
-  const docRef = db.collection('youtube');
-  // const videoIds = [];
+  const snapshot = await db.collection('youtube').get();
+  const collection = {};
+    snapshot.forEach(doc => {
+        collection[doc.id] = doc.data();
+    });
+  const videoIds = [];
 
-  // for (let i = 0; i < videoData.items.length; i++) {
-  //   try {
-  //     const reorderedVideo = await docRef.doc(videoData.items[i].id).get();
-  //     const data = reorderedVideo.data();
-  //     videoIds.push(videoData.items[i].snippet.resourceId.videoId)
-  //     if (reorderedVideo.exists && data) {
-  //       videoData.items[i].snippet.position = data.newPosition;
-  //     }
-  //   } catch (e) {
-  //     console.log(e)
-  //   }
+  for (let i = 0; i < videoData.items.length; i++) {
+    try {
+      const data = collection[videoData.items[i].id];
+      videoIds.push(videoData.items[i].snippet.resourceId.videoId)
+        videoData.items[i].snippet.position = data.newPosition;
+    } catch (e) {
+      console.log(e)
+    }
 
-  // }
+  }
 
   videoData.items.sort((a, b) => a.snippet.position - b.snippet.position);
 
