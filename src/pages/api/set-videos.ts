@@ -17,7 +17,7 @@ export default async function handler(
           const docRef = db.collection('youtube').doc(video.id);
           batch.set(docRef, video);
         });
-        batch.commit();
+        await batch.commit();
         // reorderedVideos.forEach(async (video) => {
         //   try {
         //     await db.collection('youtube').doc(video.id).set(video);
