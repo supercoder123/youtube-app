@@ -12,6 +12,12 @@ export interface YoutubeChannelResponse {
         high: VideoThumbnail,
         medium: VideoThumbnail,
       }
+    },
+    statistics: {
+      viewCount: string,
+      subscriberCount: string,
+      hiddenSubscriberCount: boolean,
+      videoCount: string
     }
   }>
 };
@@ -61,7 +67,7 @@ export interface VideoResponse {
 export interface PageProps {
   videos: YoutubeVideosResponse;
   channel: YoutubeChannelResponse;
-  videoIdCommaList: string;
+  playlistId: string;
   fallback?: {
     [key: string]: YoutubeVideosResponse['items']
   }
