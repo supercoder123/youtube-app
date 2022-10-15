@@ -38,7 +38,7 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   const [cards, setCards] = useState<YoutubeVideosResponse['items']>(videos.items);
   const [reorderedCards, setReorderedCards] = useState<UpdatedVideoList>([]);
   const { data, size, setSize, isValidating } = useSWRInfinite(getKey(playlistId), fetcher, {
-    revalidateIfStale: false,
+    revalidateIfStale: true,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateAll: false,
