@@ -61,7 +61,7 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   )
 
   useEffect(() => {
-    mutate(`/api/get-videos?pageNumber=$0&playlistId=${playlistId}`, data);
+    setSize(0);
   }, []);
 
   useEffect(() => {
