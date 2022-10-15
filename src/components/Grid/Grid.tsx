@@ -6,7 +6,10 @@ import {
     PointerSensor,
     useSensor,
     useSensors,
-    DragOverlay
+    DragOverlay,
+    DragStartEvent,
+    DragEndEvent,
+    UniqueIdentifier
 } from "@dnd-kit/core";
 import {
     arrayMove,
@@ -19,11 +22,13 @@ import { YoutubeVideoItem, YoutubeVideosResponse } from '../../types';
 import VideoCard from '../VideoCard/VideoCard';
 import { UpdatedVideoList } from '../../pages';
 
-const Grid = ({cards, setCards, getReorderedCards}: {
-    cards: YoutubeVideosResponse['items'], 
-    setCards: Dispatch<SetStateAction<YoutubeVideoItem[]>>
-    getReorderedCards: Dispatch<SetStateAction<UpdatedVideoList | undefined>>}) => {
-    const [activeId, setActiveId] = useState(null);
+const Grid = ({ cards, setCards, getReorderedCards, isLoading }: {
+    cards: YoutubeVideosResponse['items'],
+    setCards: Dispatch<SetStateAction<YoutubeVideoItem[]>>,
+    getReorderedCards: (cards: UpdatedVideoList) => void,
+    isLoading: boolean
+}) => {
+    const [activeId, setActiveId] = useState<UniqueIdentifier | null>('');
     // const [items, setItems] = useState(cards);
 
     const sensors = useSensors(
@@ -33,20 +38,18 @@ const Grid = ({cards, setCards, getReorderedCards}: {
         })
     );
 
-    const handleDragStart = (event) => {
+    const handleDragStart = (event: DragStartEvent) => {
         setActiveId(event.active.id);
     };
 
-    const handleDragEnd = (event) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         setActiveId(null);
         const { active, over } = event;
-        if (active.id !== over.id) {
+        if (over && active.id !== over.id) {
             setCards((items) => {
-                console.log('old', items);
                 const oldIndex = items.findIndex(item => item.id === active.id);
                 const newIndex = items.findIndex(item => item.id === over.id);
                 const newItems = arrayMove(items, oldIndex, newIndex);
-                console.log('new', newItems);
                 const diff = newItems.map((item: YoutubeVideoItem, i) => {
                     if (item.snippet.position !== i) {
                         return {
@@ -68,20 +71,21 @@ const Grid = ({cards, setCards, getReorderedCards}: {
     };
 
     return (
-        <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-            onDragStart={handleDragStart}
-        >
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 items-center">
-                <SortableContext items={cards} strategy={rectSortingStrategy}>
-                    {
-                        cards.map((video, index) => {
-                            return <VideoCard key={video.id} id={video.id} index={index} video={video} />
-                        })
-                    }
-                    {/* <DragOverlay>
+        <>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+                onDragStart={handleDragStart}
+            >
+                <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 items-center">
+                    <SortableContext items={cards} strategy={rectSortingStrategy}>
+                        {
+                            cards.map((video, index) => {
+                                return <VideoCard key={video.id} id={video.id} index={index} video={video} />
+                            })
+                        }
+                        {/* <DragOverlay>
                         {activeId ? (
                             <div
                                 style={{
@@ -92,10 +96,16 @@ const Grid = ({cards, setCards, getReorderedCards}: {
                             ></div>
                         ) : null}
                     </DragOverlay> */}
-                </SortableContext>
+                    </SortableContext>
 
-            </div>
-        </DndContext >
+                </div>
+            </DndContext >
+
+            {(isLoading) && (<div className="flex justify-center mt-3">
+                <div className="animate-ping inline-flex h-10 w-10 rounded-full bg-sky-400 opacity-75"></div>
+            </div>)}
+
+        </>
 
     )
 }

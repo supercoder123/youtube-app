@@ -1,43 +1,27 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import VideoCard from '../components/VideoCard/VideoCard';
-import update from 'immutability-helper';
-import { PageProps, UpdatedVideoPropsItem, YoutubeChannelResponse, YoutubeVideoItem, YoutubeVideosResponse } from '../types';
-import { CHANNELS_API_URL, PLAYLISTS_ITEMS_API_URL } from '../constants/youtube-api';
-import db from '../firebase/admin';
+import { useCallback, useEffect, useState } from 'react';
+import { PageProps, UpdatedVideoPropsItem, YoutubeChannelResponse, YoutubeVideosResponse } from '../types';
+import { CHANNELS_API_URL } from '../constants/youtube-api';
 import useSWRInfinite from 'swr/infinite';
-import { SWRConfig, unstable_serialize } from 'swr';
+import { SWRConfig } from 'swr';
 import Grid from '../components/Grid/Grid';
 import { getReorderedYoutubeVideos } from '../api-handler/getReorderedYoutubeVideos';
-
-
-// const getKey = (pageIndex: number, previousPageData: YoutubeVideosResponse) => {
-//   // reached the end
-//   if (previousPageData && !previousPageData.nextPageToken) return null;
-
-//   // first page, we don't have `previousPageData`
-//   if (pageIndex === 0) return '/api/get-videos';
-
-//   // add the cursor to the API endpoint
-//   return `${PLAYLISTS_ITEMS_API_URL}&pageToken=${previousPageData.nextPageToken}`;
-// }
+import Image from 'next/image';
 
 const getKey = (playlistId: string) => {
-  return (pageIndex: number, previousPageData: {videos: YoutubeVideosResponse}) => {
+  return (pageIndex: number, previousPageData: { videos: YoutubeVideosResponse }) => {
     // reached the end
-    console.log(previousPageData)
+    // console.log(previousPageData)
     if (previousPageData && !previousPageData.videos.nextPageToken) return null;
 
     // first page, we don't have `previousPageData`
     if (pageIndex === 0) return `/api/get-videos?pageNumber=${pageIndex}&playlistId=${playlistId}`;
-  
+
     // add the cursor to the API endpoint
     return `/api/get-videos?pageNumber=${pageIndex}&playlistId=${playlistId}&pageToken=${previousPageData.videos.nextPageToken}`;
   };
 }
-
-// const fetcher = (...args: any[]) => fetch(...args: any[]).then(res => res.json())
 
 const fetcher = async (
   input: RequestInfo,
@@ -52,38 +36,41 @@ export type UpdatedVideoList = (UpdatedVideoPropsItem | null)[];
 
 const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) => {
   const [cards, setCards] = useState<YoutubeVideosResponse['items']>(videos.items);
-  const [reorderedCards, setReorderedCards] = useState<UpdatedVideoList>();
+  const [reorderedCards, setReorderedCards] = useState<UpdatedVideoList>([]);
   const { data, size, setSize, isValidating } = useSWRInfinite(getKey(playlistId), fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateAll: false,
     revalidateFirstPage: false,
-  })
-  const handleScroll = () => {
-    const { clientHeight, scrollTop, scrollHeight } = document.documentElement;
-    if ((clientHeight + scrollTop) >= scrollHeight) {
-      setSize(size + 1);
-    }
-  }
+  });
+
+  const handleScroll = useCallback(
+    () => {
+      const { clientHeight, scrollTop, scrollHeight } = document.documentElement;
+      if (isValidating) {
+        return;
+      }
+      if ((clientHeight + scrollTop) >= scrollHeight) {
+        setSize(size + 1);
+      }
+    },
+    [setSize, size, isValidating],
+  )
 
   useEffect(() => {
-    console.log(data)
     if (data && data.length >= 2) {
-      setCards(prevCards => [...prevCards, ...data[data.length - 1]['videos'].items])
+      const swrFetchedVideos = data.reduce((arr, videoResponse, i) => {
+        arr.push(...videoResponse.videos.items);
+        return arr;
+      }, []);
+      setCards(swrFetchedVideos);
     }
   }, [data])
 
-  const getReorderedCards = (cards) => {
+  const getReorderedCards = (cards: UpdatedVideoList) => {
     setReorderedCards(cards)
   }
-
-  useEffect(() => {
-    console.log('reorderedCards', reorderedCards)
-
-  }, [reorderedCards]);
-
-
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll)
@@ -91,19 +78,16 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [size]);
+  }, [size, handleScroll]);
 
   function saveOrder() {
     fetch('/api/set-videos', {
       method: 'POST',
       body: JSON.stringify(reorderedCards),
+    }).then(() => {
+      setReorderedCards([]);
     });
   }
-
-  // if (!data) return 'loading';
-  console.log('grid')
-
-  
 
   return (
     <SWRConfig value={{ fallback }}>
@@ -117,7 +101,12 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
 
         <main>
           <div className="w-full">
-            <h1 className="text-2xl text-center">{channel.items[0].snippet.title}</h1>
+            <div className="h-64 flex flex-col justify-center items-center">
+              <h1 className="text-2xl text-center">{channel.items[0].snippet.title}</h1>
+              <div className="m-10">
+                <Image className="rounded-full self-center m-10 mx-auto" layout="fixed" height={80} width={80} src={channel.items[0].snippet.thumbnails.high.url} alt={channel.items[0].snippet.title} />
+              </div>
+            </div>
             <button
               className='px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2'
               onClick={() => {
@@ -126,9 +115,7 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
             >
               Save
             </button>
-            <Grid cards={cards} setCards={setCards} getReorderedCards={getReorderedCards}/>
-
-            {(isValidating) && <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></div>}
+            <Grid cards={cards} setCards={setCards} getReorderedCards={getReorderedCards} isLoading={isValidating} />
 
           </div>
         </main>
@@ -141,38 +128,8 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   )
 }
 
-// export async function getStaticProps(context: any) {
+export async function getStaticProps(context: any) {
 
-//   const channelData: YoutubeChannelResponse = await (await fetch(CHANNELS_API_URL)).json();
-//   const playlistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
-//   const videoData: YoutubeVideosResponse = await (await fetch(`${PLAYLISTS_ITEMS_API_URL}&playlistId=${playlistId}`)).json();
-//   const docRef = db.collection('youtube');
-//   const videoIds = [];
-
-//   for (let i=0; i<videoData.items.length; i++) {
-//     const reorderedVideo = await docRef.doc(videoData.items[i].id).get();
-//     const data = reorderedVideo.data();
-//     videoIds.push(videoData.items[i].snippet.resourceId.videoId)
-//     if (reorderedVideo.exists && data) {
-//       videoData.items[i].snippet.position = data.newPosition;
-//     }
-//   }
-
-//   videoData.items.sort((a, b) => a.snippet.position - b.snippet.position);
-
-//   return {
-//     props: {
-//       videos: videoData,
-//       channel: channelData,
-//       videoIdCommaList: videoIds.join(','),
-//       fallback: {
-//         [unstable_serialize([PLAYLISTS_ITEMS_API_URL])]: videoData
-//       }
-//     },
-//   }
-// }
-
-export async function getServerSideProps(context: any) {
   const channelData: YoutubeChannelResponse = await (await fetch(CHANNELS_API_URL)).json();
   const playlistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
 
@@ -184,7 +141,7 @@ export async function getServerSideProps(context: any) {
       playlistId,
       // videoIdCommaList: videoIds.join(','),
       fallback: {
-        [unstable_serialize([PLAYLISTS_ITEMS_API_URL])]: videoData
+        ['/api/get-videos']: videoData
       }
     },
   }

@@ -78,4 +78,5 @@ export interface UpdatedVideoPropsItem {
   position: number;
   newPosition: number;
   hide?: boolean;
+  pageNumber: number
 }
