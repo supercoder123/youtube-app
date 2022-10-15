@@ -42,7 +42,7 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateAll: false,
-    revalidateFirstPage: false,
+    revalidateFirstPage: true,
   });
 
   const handleScroll = useCallback(
