@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PageProps, UpdatedVideoPropsItem, YoutubeChannelResponse, YoutubeVideosResponse } from '../types';
 import { CHANNELS_API_URL } from '../constants/youtube-api';
 import useSWRInfinite from 'swr/infinite';
-import { SWRConfig } from 'swr';
+import { SWRConfig, useSWRConfig } from 'swr';
 import Grid from '../components/Grid/Grid';
 import { getReorderedYoutubeVideos } from '../api-handler/getReorderedYoutubeVideos';
 import Image from 'next/image';
@@ -35,6 +35,7 @@ const fetcher = async (
 export type UpdatedVideoList = (UpdatedVideoPropsItem | null)[];
 
 const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) => {
+  const { mutate } = useSWRConfig()
   const [cards, setCards] = useState<YoutubeVideosResponse['items']>(videos.items);
   const [reorderedCards, setReorderedCards] = useState<UpdatedVideoList>([]);
   const { data, size, setSize, isValidating } = useSWRInfinite(getKey(playlistId), fetcher, {
@@ -58,6 +59,10 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
     },
     [setSize, size, isValidating],
   )
+
+  useEffect(() => {
+    mutate(`/api/get-videos?pageNumber=$0&playlistId=${playlistId}`);
+  }, []);
 
   useEffect(() => {
     if (data && data.length >= 2) {
