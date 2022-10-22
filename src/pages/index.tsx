@@ -54,7 +54,7 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   const { data, size, setSize, isValidating } = useSWRInfinite(getKey(playlistId), fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
-    revalidateFirstPage: true,
+    revalidateOnMount: true
   });
 
   const handleScroll = useCallback(
