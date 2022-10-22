@@ -132,7 +132,7 @@ const Grid = ({ cards, setCards, editedCards, setEditedCards, setEditInProgress,
                 </div>
             </DndContext >
 
-            {(isLoading) && (<div className="flex justify-center mt-3">
+            {(isLoading) && (<div className="fixed bottom-0 w-full flex justify-center mt-3">
                 <div className="animate-ping inline-flex h-10 w-10 rounded-full bg-sky-400 opacity-75"></div>
             </div>)}
 
