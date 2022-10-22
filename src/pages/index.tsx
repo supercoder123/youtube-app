@@ -58,7 +58,7 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
     revalidateOnReconnect: false,
     revalidateAll: false,
     revalidateFirstPage: true,
-    revalidateOnMount:false,
+    revalidateOnMount: true,
     refreshWhenHidden: false,
   });
 
