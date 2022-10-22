@@ -35,7 +35,7 @@ export interface YoutubeVideoItem {
     description: string;
     position: number;
     newPosition: number;
-    hide: false;
+    hide?: boolean;
     thumbnails: {
       default: VideoThumbnail,
       medium: VideoThumbnail,
@@ -44,7 +44,7 @@ export interface YoutubeVideoItem {
     };
     resourceId: {
       videoId: string;
-    }
+    };
   }
 }
 
@@ -75,8 +75,9 @@ export interface PageProps {
 
 export interface UpdatedVideoPropsItem {
   id: string;
-  position: number;
-  newPosition: number;
+  position?: number;
+  newPosition?: number;
   hide?: boolean;
-  pageNumber: number
+  pageNumber: number;
+  videoId: string;
 }

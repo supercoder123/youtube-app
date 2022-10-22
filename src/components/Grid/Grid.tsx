@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useRef, useState } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -18,18 +18,27 @@ import {
     rectSortingStrategy
 } from "@dnd-kit/sortable";
 
-import { YoutubeVideoItem, YoutubeVideosResponse } from '../../types';
+import { UpdatedVideoPropsItem, YoutubeVideoItem, YoutubeVideosResponse } from '../../types';
 import VideoCard from '../VideoCard/VideoCard';
-import { UpdatedVideoList } from '../../pages';
+import { EditedCardsDescription, UpdatedVideoList } from '../../pages';
 
-const Grid = ({ cards, setCards, getReorderedCards, isLoading }: {
+const keyExists = () => {
+
+}
+
+const Grid = ({ cards, setCards, editedCards, setEditedCards, setEditInProgress, isLoading, isEditing }: {
     cards: YoutubeVideosResponse['items'],
     setCards: Dispatch<SetStateAction<YoutubeVideoItem[]>>,
-    getReorderedCards: (cards: UpdatedVideoList) => void,
-    isLoading: boolean
+    editedCards: EditedCardsDescription,
+    setEditedCards: Dispatch<SetStateAction<EditedCardsDescription>>,
+    setEditInProgress:  Dispatch<SetStateAction<boolean>>,
+    isLoading: boolean,
+    isEditing: boolean
 }) => {
+    const ref = useRef(cards);
     const [activeId, setActiveId] = useState<UniqueIdentifier | null>('');
     // const [items, setItems] = useState(cards);
+
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -46,23 +55,29 @@ const Grid = ({ cards, setCards, getReorderedCards, isLoading }: {
         setActiveId(null);
         const { active, over } = event;
         if (over && active.id !== over.id) {
-            setCards((items) => {
-                const oldIndex = items.findIndex(item => item.id === active.id);
-                const newIndex = items.findIndex(item => item.id === over.id);
-                const newItems = arrayMove(items, oldIndex, newIndex);
-                const diff = newItems.map((item: YoutubeVideoItem, i) => {
-                    if (item.snippet.position !== i) {
-                        return {
-                            id: item.id,
-                            position: item.snippet.position,
-                            newPosition: i,
-                            pageNumber: parseInt((i / 25).toString()),
-                            videoId: item.snippet.resourceId.videoId
-                        };
-                    }
-                    return null;
-                }).filter(val => val);
-                getReorderedCards(diff);
+            setCards((prevItems) => {
+                const oldIndex = prevItems.findIndex(item => item.id === active.id);
+                const newIndex = prevItems.findIndex(item => item.id === over.id);
+                const newItems = arrayMove(prevItems, oldIndex, newIndex);
+                console.log(prevItems, newItems)
+                const updatedItemsMap = newItems
+                    .reduce((acc: EditedCardsDescription, item, index) => {
+                        if (item.snippet.position !== prevItems[index].snippet.position) {
+                            acc[item.id] = {
+                                ...acc[item.id],
+                                id: item.id,
+                                position: item.snippet.position,
+                                newPosition: index,
+                                pageNumber: parseInt((index / 25).toString()), // TODO: update spage size 
+                                videoId: item.snippet.resourceId.videoId
+                            };
+                        }
+                        return acc;
+                    }, editedCards);
+
+                console.log(updatedItemsMap)
+                setEditedCards(updatedItemsMap);
+                setEditInProgress(true);
 
                 return newItems;
             });
@@ -78,11 +93,27 @@ const Grid = ({ cards, setCards, getReorderedCards, isLoading }: {
                 onDragEnd={handleDragEnd}
                 onDragStart={handleDragStart}
             >
-                <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 items-center">
+                <div className="grid select-none lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 items-center">
                     <SortableContext items={cards} strategy={rectSortingStrategy}>
                         {
                             cards.map((video, index) => {
-                                return <VideoCard key={video.id} id={video.id} index={index} video={video} />
+                                let hide;
+                                if (editedCards[video.id]) {
+                                    hide = 'hide' in editedCards[video.id] ? editedCards[video.id].hide : video.snippet.hide;
+                                } else {
+                                    hide = video.snippet.hide;
+                                }
+                                return (
+                                    <VideoCard
+                                        key={video.id}
+                                        index={index}
+                                        video={video}
+                                        isEditing={isEditing}
+                                        hide={hide}
+                                        setEditedCards={setEditedCards}
+                                        setEditInProgress={setEditInProgress}
+                                    />
+                                );
                             })
                         }
                         {/* <DragOverlay>

@@ -1,13 +1,18 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PageProps, UpdatedVideoPropsItem, YoutubeChannelResponse, YoutubeVideosResponse } from '../types';
 import { CHANNELS_API_URL } from '../constants/youtube-api';
 import useSWRInfinite from 'swr/infinite';
-import { SWRConfig, useSWRConfig } from 'swr';
+import { SWRConfig } from 'swr';
 import Grid from '../components/Grid/Grid';
 import { getReorderedYoutubeVideos } from '../api-handler/getReorderedYoutubeVideos';
 import Image from 'next/image';
+import Toolbar from '../components/Toolbar/Toolbar';
+import toast from 'react-hot-toast';
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from '../firebase/client';
+
 
 const getKey = (playlistId: string) => {
   return (pageIndex: number, previousPageData: { videos: YoutubeVideosResponse }) => {
@@ -34,10 +39,18 @@ const fetcher = async (
 
 export type UpdatedVideoList = (UpdatedVideoPropsItem | null)[];
 
+export type EditedCardsDescription = {
+    [id: string]: UpdatedVideoPropsItem;
+}
+
 const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) => {
-  const { mutate } = useSWRConfig()
+  // console.log('videos', videos.items)
   const [cards, setCards] = useState<YoutubeVideosResponse['items']>(videos.items);
-  const [reorderedCards, setReorderedCards] = useState<UpdatedVideoList>([]);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editInProgress, setEditInProgress] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [editedCards, setEditedCards] = useState<EditedCardsDescription>({});
+
   const { data, size, setSize, isValidating } = useSWRInfinite(getKey(playlistId), fetcher, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
@@ -45,6 +58,8 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
     revalidateOnReconnect: false,
     revalidateAll: false,
     revalidateFirstPage: false,
+    revalidateOnMount:false,
+    refreshWhenHidden: false,
   });
 
   const handleScroll = useCallback(
@@ -61,7 +76,13 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   )
 
   useEffect(() => {
-    setSize(0);
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+    })
   }, []);
 
   useEffect(() => {
@@ -74,10 +95,6 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
     }
   }, [data])
 
-  const getReorderedCards = (cards: UpdatedVideoList) => {
-    setReorderedCards(cards)
-  }
-
   useEffect(() => {
     window.addEventListener('scroll', handleScroll)
 
@@ -89,10 +106,15 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   function saveOrder() {
     fetch('/api/set-videos', {
       method: 'POST',
-      body: JSON.stringify(reorderedCards),
+      body: JSON.stringify(editedCards),
     }).then(() => {
-      setReorderedCards([]);
+      setEditInProgress(false);
+      toast.success("Saved");
     });
+  }
+
+  function toggleEditMode() {
+    setIsEditing(prev => !prev);
   }
 
   return (
@@ -107,23 +129,18 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
 
         <main>
           <div className="w-full">
-            <div className="h-64 flex flex-col justify-center items-center">
+          {isLoggedIn && <Toolbar onSave={saveOrder} editInProgress={editInProgress} toggleEditMode={toggleEditMode}  isEditing={isEditing} />}
+            <div className="h-62 mt-20 mb-10 flex flex-col justify-center items-center">
               <h1 className="text-2xl text-center">{channel.items[0].snippet.title}</h1>
               <div className="m-10">
                 <Image className="rounded-full self-center m-10 mx-auto" layout="fixed" height={80} width={80} src={channel.items[0].snippet.thumbnails.high.url} alt={channel.items[0].snippet.title} />
               </div>
             </div>
-            <button
-              className='px-4 py-1 text-sm text-purple-600 font-semibold rounded-full border border-purple-200 hover:text-white hover:bg-purple-600 hover:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2'
-              onClick={() => {
-                saveOrder();
-              }}
-            >
-              Save
-            </button>
-            <Grid cards={cards} setCards={setCards} getReorderedCards={getReorderedCards} isLoading={isValidating} />
+
+            <Grid cards={cards} setCards={setCards} editedCards={editedCards} setEditedCards={setEditedCards} setEditInProgress={setEditInProgress} isLoading={isValidating} isEditing={isEditing}/>
 
           </div>
+          <div id="portal-root"></div>
         </main>
 
         <footer>
@@ -140,6 +157,7 @@ export async function getStaticProps(context: any) {
   const playlistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
 
   const videoData = await getReorderedYoutubeVideos(playlistId, '');
+
   return {
     props: {
       videos: videoData.videos,
@@ -147,7 +165,7 @@ export async function getStaticProps(context: any) {
       playlistId,
       // videoIdCommaList: videoIds.join(','),
       fallback: {
-        ['/api/get-videos']: videoData
+        [`/api/get-videos?pageNumber=0&playlistId=${playlistId}`]: videoData
       }
     },
   }

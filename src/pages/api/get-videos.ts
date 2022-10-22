@@ -6,7 +6,6 @@ export default async function handler(
     res: NextApiResponse
   ) {
     if (req.method === "GET") {
-        // console.log('get', req.query)
         const nextPageToken = req.query.pageToken as string;
         const playlistId = req.query.playlistId as string;
         const pageNumber = req.query.pageNumber as string;
