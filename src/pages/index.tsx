@@ -52,13 +52,13 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   const [editedCards, setEditedCards] = useState<EditedCardsDescription>({});
 
   const { data, size, setSize, isValidating } = useSWRInfinite(getKey(playlistId), fetcher, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    persistSize: false,
+    // revalidateIfStale: false,
+    // revalidateOnFocus: false,
+    // persistSize: false,
     revalidateOnReconnect: false,
     revalidateAll: false,
     revalidateFirstPage: true,
-    revalidateOnMount: true,
+    // revalidateOnMount: true,
     refreshWhenHidden: false,
   });
 
