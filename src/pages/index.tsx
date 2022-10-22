@@ -54,7 +54,8 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   const { data, size, setSize, isValidating } = useSWRInfinite(getKey(playlistId), fetcher, {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
-    revalidateFirstPage: true
+    revalidateFirstPage: false,
+    revalidateAll: false
   });
 
   const handleScroll = useCallback(
@@ -146,7 +147,7 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   )
 }
 
-export async function getStaticProps(context: any) {
+export async function getServerSideProps(context: any) {
 
   const channelData: YoutubeChannelResponse = await (await fetch(CHANNELS_API_URL)).json();
   const playlistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
