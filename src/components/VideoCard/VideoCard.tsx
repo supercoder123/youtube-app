@@ -29,15 +29,15 @@ const VideoPopup = ({
       className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-20 overflow-y-auto"
     >
       <div className="flex w-full h-full fixed justify-center items-center">
-        <div className="aspect-video w-full md:w-8/12 resize bg-gray-800 rounded-lg relative drop-shadow-md m-3">
-          <button
+        <div className="aspect-video w-full md:w-8/12 resize overflow-hidden bg-gray-800 rounded-lg relative drop-shadow-md m-1 p-2">
+          {/* <button
             className="absolute rounded-full border border-neutral-600 w-8 h-8 -right-2 -top-2 bg-stone-900"
             onClick={() => {
               onClose(false);
             }}
           >
             X
-          </button>
+          </button> */}
 
           <iframe
             className="w-full h-full rounded-lg"

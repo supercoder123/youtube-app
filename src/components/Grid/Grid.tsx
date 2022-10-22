@@ -18,9 +18,9 @@ import {
     rectSortingStrategy
 } from "@dnd-kit/sortable";
 
-import { UpdatedVideoPropsItem, YoutubeVideoItem, YoutubeVideosResponse } from '../../types';
+import { YoutubeVideoItem, YoutubeVideosResponse } from '../../types';
 import VideoCard from '../VideoCard/VideoCard';
-import { EditedCardsDescription, UpdatedVideoList } from '../../pages';
+import { EditedCardsDescription } from '../../pages';
 
 const keyExists = () => {
 
@@ -132,9 +132,9 @@ const Grid = ({ cards, setCards, editedCards, setEditedCards, setEditInProgress,
                 </div>
             </DndContext >
 
-            {(isLoading) && (<div className="flex justify-center mt-3">
+            {/* {(isLoading) && (<div className="flex justify-center mt-3">
                 <div className="animate-ping inline-flex h-10 w-10 rounded-full bg-sky-400 opacity-75"></div>
-            </div>)}
+            </div>)} */}
 
         </>
 
