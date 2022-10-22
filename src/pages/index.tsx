@@ -164,7 +164,7 @@ export async function getStaticProps(context: any) {
         [`/api/get-videos?pageNumber=0&playlistId=${playlistId}`]: videoData
       }
     },
-    revalidate: 10
+    // revalidate: 10
   }
 }
 
