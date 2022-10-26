@@ -2,6 +2,7 @@ import { NextPage } from "next";
 import {
   signInWithPopup,
   GoogleAuthProvider,
+  signOut,
 } from "firebase/auth";
 import { auth, provider, clientDb } from "../firebase/client";
 import { useRouter } from "next/router";
@@ -27,6 +28,7 @@ async function signIn() {
       return true;
     } else {
       // doc.data() will be undefined in this case
+      await signOut(auth);
       toast.error("Unauthorized", { position: "top-center" });
       return false;
     }
