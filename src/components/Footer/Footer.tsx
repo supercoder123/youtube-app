@@ -113,7 +113,7 @@ const Footer = () => {
       <div className="flex mx-auto justify-center">
         <HoverIcon name="youtube" hoverText="Subscribe" href="https://www.youtube.com/channel/UCDt-2KorfMpzLf-CX71n18A?sub_confirmation=1" />
         <HoverIcon name="facebook" hoverText="Facebook" href="https://www.facebook.com/LeftHandRightFilms" />
-        <HoverIcon name="instagram" hoverText="Instagram" href="https://vimeo.com/user71836566" />
+        <HoverIcon name="instagram" hoverText="Instagram" href="https://instagram.com/lefthandright_" />
         <HoverIcon name="vimeo" hoverText="Vimeo" href="https://vimeo.com/user71836566" />
         <HoverIcon name="email" hoverText="Email" href="mailto:info@lefthandright.in" />
       </div>
