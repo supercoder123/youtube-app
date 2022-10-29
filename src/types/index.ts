@@ -45,6 +45,10 @@ export interface YoutubeVideoItem {
     resourceId: {
       videoId: string;
     };
+  },
+  contentDetails: {
+    videoId: string;
+    videoPublishedAt: string;
   }
 }
 

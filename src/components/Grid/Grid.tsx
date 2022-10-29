@@ -22,10 +22,6 @@ import { YoutubeVideoItem, YoutubeVideosResponse } from '../../types';
 import VideoCard from '../VideoCard/VideoCard';
 import { EditedCardsDescription } from '../../pages';
 
-const keyExists = () => {
-
-}
-
 const Grid = ({ cards, setCards, editedCards, setEditedCards, setEditInProgress, isLoading, isEditing }: {
     cards: YoutubeVideosResponse['items'],
     setCards: Dispatch<SetStateAction<YoutubeVideoItem[]>>,
@@ -59,7 +55,6 @@ const Grid = ({ cards, setCards, editedCards, setEditedCards, setEditInProgress,
                 const oldIndex = prevItems.findIndex(item => item.id === active.id);
                 const newIndex = prevItems.findIndex(item => item.id === over.id);
                 const newItems = arrayMove(prevItems, oldIndex, newIndex);
-                console.log(prevItems, newItems)
                 const updatedItemsMap = newItems
                     .reduce((acc: EditedCardsDescription, item, index) => {
                         if (item.snippet.position !== prevItems[index].snippet.position) {
@@ -75,7 +70,6 @@ const Grid = ({ cards, setCards, editedCards, setEditedCards, setEditInProgress,
                         return acc;
                     }, editedCards);
 
-                console.log(updatedItemsMap)
                 setEditedCards(updatedItemsMap);
                 setEditInProgress(true);
 
@@ -132,7 +126,7 @@ const Grid = ({ cards, setCards, editedCards, setEditedCards, setEditInProgress,
                 </div>
             </DndContext >
 
-            {(isLoading) && (<div className="fixed bottom-0 w-full flex justify-center mt-3">
+            {(isLoading) && (<div className=" w-full flex justify-center mt-3">
                 <div className="animate-ping inline-flex h-10 w-10 rounded-full bg-sky-400 opacity-75"></div>
             </div>)}
 

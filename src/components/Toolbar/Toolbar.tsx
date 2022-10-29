@@ -12,7 +12,7 @@ interface ToolbarProps {
 const Toolbar = ({ onSave, toggleEditMode, isEditing, editInProgress }: ToolbarProps) => {
     return (
         <div className={
-            cx('container sticky top-1 rounded-full p-2 bg-neutral-800 z-20 m-2 px-2 mx-auto', { 'outline outline-2 outline-blue-600': isEditing })
+            cx('container sticky top-1 rounded-full p-2 bg-neutral-800 z-20 m-2 px-2 mx-auto', { 'bg-blue-900': isEditing })
         }>
             <div className="flex justify-between">
                 <div className='flex'>

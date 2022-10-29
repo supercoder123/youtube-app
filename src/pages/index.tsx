@@ -12,7 +12,7 @@ import Toolbar from '../components/Toolbar/Toolbar';
 import toast from 'react-hot-toast';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../firebase/client';
-
+import Footer from '../components/Footer/Footer';
 
 const getKey = (playlistId: string) => {
   return (pageIndex: number, previousPageData: { videos: YoutubeVideosResponse }) => {
@@ -55,7 +55,8 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateFirstPage: false,
-    revalidateAll: false
+    revalidateAll: false,
+    revalidateOnMount: false,
   });
 
   const handleScroll = useCallback(
@@ -126,22 +127,23 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
         <main>
           <div className="w-full">
           {isLoggedIn && <Toolbar onSave={saveOrder} editInProgress={editInProgress} toggleEditMode={toggleEditMode}  isEditing={isEditing} />}
-            <div className="h-62 mt-20 mb-10 flex flex-col justify-center items-center">
-              <h1 className="text-2xl text-center">{channel.items[0].snippet.title}</h1>
+            <div className="h-62 sm:mt-10 mb-10 flex flex-col justify-center items-center">
               <div className="m-10">
                 <Image className="rounded-full self-center m-10 mx-auto" layout="fixed" height={80} width={80} src={channel.items[0].snippet.thumbnails.high.url} alt={channel.items[0].snippet.title} />
               </div>
+              <h1 className="text-white text-3xl text-center">{channel.items[0].snippet.title}</h1>
+              <p className="text-white text-lg text-center mt-3 mb-6 px-5">Live streams | Behind the scenes | Events | After-movies | Digital video content</p>
+        <Footer />
+              
             </div>
 
             <Grid cards={cards} setCards={setCards} editedCards={editedCards} setEditedCards={setEditedCards} setEditInProgress={setEditInProgress} isLoading={isValidating} isEditing={isEditing}/>
 
           </div>
-          <div id="portal-root"></div>
         </main>
 
-        <footer>
+        <div id="portal-root"></div>
 
-        </footer>
       </div>
     </SWRConfig>
   )

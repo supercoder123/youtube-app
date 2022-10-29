@@ -1,6 +1,5 @@
 import Image from "next/image";
 import React, { Dispatch, SetStateAction, useState } from "react";
-import ReactDOM from "react-dom";
 import { YoutubeVideoItem } from "../../types";
 import PlayIcon from "../../assets/images/play-icon.svg";
 import { useSortable } from "@dnd-kit/sortable";
@@ -8,50 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 import cx from "classnames";
 import { EditedCardsDescription } from "../../pages";
 import { useModal } from "./useModal";
-
-const VideoPopup = ({
-  isOpen,
-  onClose,
-  videoId,
-}: {
-  isOpen: boolean;
-  videoId: string;
-  onClose: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
-  if (!isOpen) {
-    return null;
-  }
-  return ReactDOM.createPortal(
-    <div
-      onClick={() => {
-        onClose(false);
-      }}
-      className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-20 overflow-y-auto"
-    >
-      <div className="flex w-full h-full fixed justify-center items-center">
-        <div className="aspect-video w-full md:w-8/12 resize overflow-hidden bg-gray-800 rounded-lg relative drop-shadow-md m-1 p-2">
-          {/* <button
-            className="absolute rounded-full border border-neutral-600 w-8 h-8 -right-2 -top-2 bg-stone-900"
-            onClick={() => {
-              onClose(false);
-            }}
-          >
-            X
-          </button> */}
-
-          <iframe
-            className="w-full h-full rounded-lg"
-            src={`https://www.youtube.com/embed/${videoId}`}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        </div>
-      </div>
-    </div>,
-    document.getElementById("portal-root")!
-  );
-};
+import VideoPopup from "../VideoPopup/VideoPopup";
 
 const VideoCard = ({
   video,
@@ -75,6 +31,7 @@ const VideoCard = ({
     video.snippet?.thumbnails?.high.url;
   const defaultThumbnail = video.snippet?.thumbnails?.high.url;
   const videoId = video.snippet.resourceId.videoId;
+  const description = video.snippet.description;
   const [isOpen, setIsOpen, toggleModal] = useModal(false);
 
   const {
@@ -107,14 +64,14 @@ const VideoCard = ({
         key={video.id}
         style={style}
         ref={setNodeRef}
-        className={cx("relative group", {
+        className={cx("relative group ease-in-out", {
           "cursor-grab border m-2 rounded-sm": isEditing,
           "cursor-pointer": !isEditing,
           "opacity-30 border-dashed border-4 ": hide,
         })}
       >
         <Image
-          className="object-cover aspect-video sm:w-full group-hover:scale-125 transition ease-in-out"
+          className="object-cover aspect-video sm:w-full group-hover:scale-125 transition-transform duration-300"
           src={thumbnail}
           alt={title}
           width="592"
@@ -140,38 +97,29 @@ const VideoCard = ({
                 }));
                 setEditInProgress(true);
               }}
-              className="bg-red-600 rounded-full flex justify-center items-center w-9 h-9 hover:bg-red-400"
+              className="bg-red-600 rounded-full flex justify-center items-center w-9 h-9 hover:bg-red-400 text-white"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-8 h-8"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+
             </button>
           </div>
         )}
 
         <div
           {...listeners}
-          className="flex flex-col justify-between invisible absolute p-4 md:p-8 text-base xl:text-2xl top-0 left-0 w-full h-full bg-slate-800/80 group-hover:visible ease-in-out"
+          className="flex flex-col justify-between invisible absolute p-4 md:p-8 text-base xl:text-xl top-0 left-0 w-full h-full bg-gradient-to-t from-black/100 via-black-50 to-transparent text-white uppercase group-hover:visible"
         >
-          {title}
           <div className="flex justify-between items-center">
-            <div className="h-16 w-16 rounded-full ml-auto flex justify-between">
-              <Image src={PlayIcon} alt="play icon" />
+            <div className="h-16 w-16 rounded-full mr-auto flex justify-between">
+              <Image src={PlayIcon} className="scale-50 group-hover:scale-100 transition" alt="play icon" />
             </div>
 
             <div className="text-base"></div>
           </div>
+          <span className="opacity-0 -translate-x-4 group-hover:translate-x-0 group-hover:opacity-100 transition duration-500">{title}</span>
+
         </div>
       </div>
 
