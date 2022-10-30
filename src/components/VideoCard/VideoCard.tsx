@@ -78,6 +78,7 @@ const VideoCard = ({
           height="332"
           layout="responsive"
           placeholder="blur"
+          priority={true}
           blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN0cXS5AQADPQGj+65iUQAAAABJRU5ErkJggg=="
         />
 
