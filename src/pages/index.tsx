@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PageProps, UpdatedVideoPropsItem, YoutubeChannelResponse, YoutubeVideosResponse } from '../types';
 import { CHANNELS_API_URL } from '../constants/youtube-api';
 import useSWRInfinite from 'swr/infinite';
@@ -8,12 +8,19 @@ import { SWRConfig } from 'swr';
 import Grid from '../components/Grid/Grid';
 import { getReorderedYoutubeVideos } from '../api-handler/getReorderedYoutubeVideos';
 import Image from 'next/image';
-import Toolbar from '../components/Toolbar/Toolbar';
 import toast from 'react-hot-toast';
-// import { onAuthStateChanged } from "firebase/auth";
 import { getFirebaseClient } from '../firebase/client';
-import Footer from '../components/Footer/Footer';
+import dynamic from 'next/dynamic';
 
+const Toolbar = dynamic(() => import('../components/Toolbar/Toolbar'), {
+  suspense: false,
+  ssr: false
+})
+
+const Footer = dynamic(() => import('../components/Footer/Footer'), {
+  suspense: false,
+  ssr: false
+})
 
 const getKey = (playlistId: string) => {
   return (pageIndex: number, previousPageData: { videos: YoutubeVideosResponse }) => {
@@ -45,7 +52,6 @@ export type EditedCardsDescription = {
 }
 
 const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) => {
-  // console.log('videos', videos.items)
   const [cards, setCards] = useState<YoutubeVideosResponse['items']>(videos.items);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editInProgress, setEditInProgress] = useState<boolean>(false);
