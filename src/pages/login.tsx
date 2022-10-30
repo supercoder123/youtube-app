@@ -4,15 +4,23 @@ import {
   GoogleAuthProvider,
   signOut,
 } from "firebase/auth";
-import { auth, provider, clientDb } from "../firebase/client";
+import { getFirebaseClient } from "../firebase/client";
 import { useRouter } from "next/router";
-import { doc, getDoc } from "firebase/firestore";
+// import { doc, getDoc } from "firebase/firestore";
 import toast from "react-hot-toast";
 
 type LoginPageProps = {};
 
 async function signIn() {
   try {
+    const [firebase, authModule, firestoreModule, app] = await getFirebaseClient();
+    const { getAuth, onAuthStateChanged, GoogleAuthProvider } = authModule;
+    const { getFirestore, doc, getDoc } = firestoreModule;
+
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+    const clientDb = getFirestore(app)
+
     const result = await signInWithPopup(auth, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     // const token = credential?.accessToken;

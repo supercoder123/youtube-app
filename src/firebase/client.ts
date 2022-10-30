@@ -1,7 +1,4 @@
-import { initializeApp } from "firebase/app";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-
+import { FirebaseApp } from 'firebase/app';
 
 const firebaseConfig = {
     apiKey: "AIzaSyC4eoBC80aEtdnjIgbL4A9vyJqln1w22us",
@@ -12,12 +9,20 @@ const firebaseConfig = {
     appId: "1:613173215258:web:30b00ade1f947b220891a3"
 };
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
-export const provider = new GoogleAuthProvider();
+type FirebaseModule = typeof import('firebase/app');
+type FirebaseAuthModule = typeof import('firebase/auth');
+type FirebaseFirestoreModule = typeof import('firebase/firestore');
 
-export const auth = getAuth();
+export const getFirebaseClient = async (): Promise<[FirebaseModule, FirebaseAuthModule, FirebaseFirestoreModule, FirebaseApp]> => {
+    const firebase = await import('firebase/app')
+    const app = firebase.initializeApp(firebaseConfig)
 
-export const clientDb = getFirestore(app);
+    const [firebaseAuth, firebaseFirestore] = await Promise.all([
+        import('firebase/auth'),
+        import('firebase/firestore'),
+    ]);
+
+    return [firebase, firebaseAuth, firebaseFirestore, app];
+}
 
 

@@ -10,9 +10,10 @@ import { getReorderedYoutubeVideos } from '../api-handler/getReorderedYoutubeVid
 import Image from 'next/image';
 import Toolbar from '../components/Toolbar/Toolbar';
 import toast from 'react-hot-toast';
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from '../firebase/client';
+// import { onAuthStateChanged } from "firebase/auth";
+import { getFirebaseClient } from '../firebase/client';
 import Footer from '../components/Footer/Footer';
+
 
 const getKey = (playlistId: string) => {
   return (pageIndex: number, previousPageData: { videos: YoutubeVideosResponse }) => {
@@ -73,13 +74,20 @@ const Home: NextPage<PageProps> = ({ videos, channel, playlistId, fallback }) =>
   )
 
   useEffect(() => {
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-      }
-    })
+    async function loadFirebaseAuth() {
+      const [firebase, authModule] = await getFirebaseClient();
+      const { getAuth, onAuthStateChanged } = authModule;
+      const auth = getAuth();
+      onAuthStateChanged(auth, user => {
+        if (user) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+        }
+      });
+    }
+
+    loadFirebaseAuth();
   }, []);
 
   useEffect(() => {
